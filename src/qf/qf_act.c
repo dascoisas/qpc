@@ -67,7 +67,7 @@ QActive *QF_active_[QF_MAX_ACTIVE + 1]; /* to be used by QF ports only */
 * @sa QF_remove_()
 */
 void QF_add_(QActive * const a) {
-    uint_fast8_t p = (uint_fast8_t)a->prio;
+    uint_fast16_t p = (uint_fast16_t)a->prio;
     QF_CRIT_STAT_
 
     /** @pre the priority of the active object must not be zero and cannot
@@ -75,8 +75,8 @@ void QF_add_(QActive * const a) {
     * object must not be already in use. QF requires each active object to
     * have a __unique__ priority.
     */
-    Q_REQUIRE_ID(100, ((uint_fast8_t)0 < p)
-                       && (p <= (uint_fast8_t)QF_MAX_ACTIVE)
+    Q_REQUIRE_ID(100, ((uint_fast16_t)0 < p)
+                       && (p <= (uint_fast16_t)QF_MAX_ACTIVE)
                        && (QF_active_[p] == (QActive *)0));
 
     QF_CRIT_ENTRY_();
@@ -100,15 +100,15 @@ void QF_add_(QActive * const a) {
 * @sa QF_add_()
 */
 void QF_remove_(QActive * const a) {
-    uint_fast8_t p = (uint_fast8_t)a->prio;
+    uint_fast16_t p = (uint_fast16_t)a->prio;
     QF_CRIT_STAT_
 
     /** @pre the priority of the active object must not be zero and cannot
     * exceed the maximum #QF_MAX_ACTIVE. Also, the priority of the active
     * object must be already registered with the framework.
     */
-    Q_REQUIRE_ID(200, ((uint_fast8_t)0 < p)
-                       && (p <= (uint_fast8_t)QF_MAX_ACTIVE)
+    Q_REQUIRE_ID(200, ((uint_fast16_t)0 < p)
+                       && (p <= (uint_fast16_t)QF_MAX_ACTIVE)
               && (QF_active_[p] == a));
 
     QF_CRIT_ENTRY_();

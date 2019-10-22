@@ -134,7 +134,7 @@ void QXK_onIdle(void);
 
 /****************************************************************************/
 /*! QXK scheduler finds the highest-priority thread ready to run */
-uint_fast8_t QXK_sched_(void);
+uint_fast16_t QXK_sched_(void);
 
 /*! QXK activator activates the next active object. The activated AO preempts
 * the currently executing AOs.
@@ -152,7 +152,7 @@ struct QActive *QXK_current(void);
 typedef uint_fast16_t QSchedStatus;
 
 /*! QXK Scheduler lock */
-QSchedStatus QXK_schedLock(uint_fast8_t ceiling);
+QSchedStatus QXK_schedLock(uint_fast16_t ceiling);
 
 /*! QXK Scheduler unlock */
 void QXK_schedUnlock(QSchedStatus stat);

@@ -187,9 +187,9 @@ void QK_schedUnlock(QSchedStatus stat);
         (Q_ASSERT_ID(110, (me_)->eQueue.frontEvt != (QEvt *)0))
 
     #define QACTIVE_EQUEUE_SIGNAL_(me_) do { \
-        QPSet_insert(&QK_attr_.readySet, (uint_fast8_t)(me_)->prio); \
+        QPSet_insert(&QK_attr_.readySet, (uint_fast16_t)(me_)->prio); \
         if (!QK_ISR_CONTEXT_()) { \
-            if (QK_sched_() != (uint_fast8_t)0) { \
+            if (QK_sched_() != (uint_fast16_t)0) { \
                 QK_activate_(); \
             } \
         } \

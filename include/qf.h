@@ -154,11 +154,11 @@ typedef struct QActive {
 #endif
 
     /*! QF priority (1..#QF_MAX_ACTIVE) of this active object. */
-    uint8_t prio;
+	uint16_t prio;
 
 #ifdef qxk_h  /* QXK kernel used? */
     /*! QF start priority (1..#QF_MAX_ACTIVE) of this active object. */
-    uint8_t startPrio;
+    uint16_t startPrio;
 #endif
 
 } QActive;
@@ -172,7 +172,7 @@ typedef struct {
 
     /*! virtual function to start the active object (thread) */
     /** @sa QACTIVE_START() */
-    void (*start)(QActive * const me, uint_fast8_t prio,
+    void (*start)(QActive * const me, uint_fast16_t prio,
                   QEvt const *qSto[], uint_fast16_t qLen,
                   void *stkSto, uint_fast16_t stkSize,
                   QEvt const *ie);
@@ -653,7 +653,7 @@ uint_fast16_t QF_getPoolMin(uint_fast8_t const poolId);
 
 /*! This function returns the minimum of free entries of
 * the given event queue. */
-uint_fast16_t QF_getQueueMin(uint_fast8_t const prio);
+uint_fast16_t QF_getQueueMin(uint_fast16_t const prio);
 
 /*! Internal QF implementation of creating new dynamic event. */
 QEvt *QF_newX_(uint_fast16_t const evtSize,

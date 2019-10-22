@@ -94,7 +94,7 @@ void QV_onIdle(void);
         Q_ASSERT_ID(0, (me_)->eQueue.frontEvt != (QEvt *)0)
 
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
-        QPSet_insert(&QV_readySet_, (uint_fast8_t)(me_)->prio)
+        QPSet_insert(&QV_readySet_, (uint_fast16_t)(me_)->prio)
 
     /* native QF event pool operations */
     #define QF_EPOOL_TYPE_            QMPool

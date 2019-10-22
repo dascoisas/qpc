@@ -154,7 +154,7 @@ void QF_publish_(QEvt const * const e, void const * const sender)
     QF_CRIT_EXIT_();
 
     if (QPSet_notEmpty(&subscrList)) { /* any subscribers? */
-        uint_fast8_t p;
+        uint_fast16_t p;
         QF_SCHED_STAT_
 
         QPSet_findMax(&subscrList, p); /* the highest-prio subscriber */
@@ -172,9 +172,9 @@ void QF_publish_(QEvt const * const e, void const * const sender)
                 QPSet_findMax(&subscrList, p); /* highest-prio subscriber */
             }
             else {
-                p = (uint_fast8_t)0; /* no more subscribers */
+                p = (uint_fast16_t)0; /* no more subscribers */
             }
-        } while (p != (uint_fast8_t)0);
+        } while (p != (uint_fast16_t)0);
         QF_SCHED_UNLOCK_(); /* unlock the scheduler */
     }
 
@@ -205,12 +205,12 @@ void QF_publish_(QEvt const * const e, void const * const sender)
 * QF_publish_(), QActive_unsubscribe(), and QActive_unsubscribeAll()
 */
 void QActive_subscribe(QActive const * const me, enum_t const sig) {
-    uint_fast8_t p = (uint_fast8_t)me->prio;
+    uint_fast16_t p = (uint_fast16_t)me->prio;
     QF_CRIT_STAT_
 
     Q_REQUIRE_ID(300, ((enum_t)Q_USER_SIG <= sig)
               && (sig < QF_maxPubSignal_)
-              && ((uint_fast8_t)0 < p) && (p <= (uint_fast8_t)QF_MAX_ACTIVE)
+              && ((uint_fast16_t)0 < p) && (p <= (uint_fast16_t)QF_MAX_ACTIVE)
               && (QF_active_[p] == me));
 
     QF_CRIT_ENTRY_();
@@ -253,7 +253,7 @@ void QActive_subscribe(QActive const * const me, enum_t const sig) {
 * QF_publish_(), QActive_subscribe(), and QActive_unsubscribeAll()
 */
 void QActive_unsubscribe(QActive const * const me, enum_t const sig) {
-    uint_fast8_t p = (uint_fast8_t)me->prio;
+    uint_fast16_t p = (uint_fast16_t)me->prio;
     QF_CRIT_STAT_
 
     /** @pre the singal and the prioriy must be in ragne, the AO must also
@@ -261,7 +261,7 @@ void QActive_unsubscribe(QActive const * const me, enum_t const sig) {
     */
     Q_REQUIRE_ID(400, ((enum_t)Q_USER_SIG <= sig)
               && (sig < QF_maxPubSignal_)
-              && ((uint_fast8_t)0 < p) && (p <= (uint_fast8_t)QF_MAX_ACTIVE)
+              && ((uint_fast16_t)0 < p) && (p <= (uint_fast16_t)QF_MAX_ACTIVE)
               && (QF_active_[p] == me));
 
     QF_CRIT_ENTRY_();
@@ -302,11 +302,11 @@ void QActive_unsubscribe(QActive const * const me, enum_t const sig) {
 * QF_publish_(), QActive_subscribe(), and QActive_unsubscribe()
 */
 void QActive_unsubscribeAll(QActive const * const me) {
-    uint_fast8_t p = (uint_fast8_t)me->prio;
+    uint_fast16_t p = (uint_fast16_t)me->prio;
     enum_t sig;
 
-    Q_REQUIRE_ID(500, ((uint_fast8_t)0 < p)
-                        && (p <= (uint_fast8_t)QF_MAX_ACTIVE)
+    Q_REQUIRE_ID(500, ((uint_fast16_t)0 < p)
+                        && (p <= (uint_fast16_t)QF_MAX_ACTIVE)
                         && (QF_active_[p] == me));
 
     for (sig = (enum_t)Q_USER_SIG; sig < QF_maxPubSignal_; ++sig) {

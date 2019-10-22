@@ -37,13 +37,15 @@
 ******************************************************************************
 * @endcond
 */
+#pragma warning ( push )
+#pragma warning ( disable: 4310 )
+
 #define QP_IMPL           /* this is QP implementation */
 #include "qs_port.h"      /* QS port */
 #include "qs_pkg.h"       /* QS package-scope interface */
 #include "qassert.h"      /* QP embedded systems-friendly assertions */
 
 Q_DEFINE_THIS_MODULE("qs")
-
 
 /****************************************************************************/
 extern char_t const Q_BUILD_DATE[12];
@@ -876,3 +878,4 @@ void QS_str(char_t const *s) {
     QS_priv_.used   = used;    /* save # of used buffer space */
 }
 
+#pragma warning ( pop )

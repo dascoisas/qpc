@@ -393,11 +393,11 @@ QEvt const *QActive_get_(QActive * const me) {
 * the minimum of free ever present in the given event queue of an active
 * object with priority @p prio, since the active object was started.
 */
-uint_fast16_t QF_getQueueMin(uint_fast8_t const prio) {
+uint_fast16_t QF_getQueueMin(uint_fast16_t const prio) {
     uint_fast16_t min;
     QF_CRIT_STAT_
 
-    Q_REQUIRE_ID(400, (prio <= (uint_fast8_t)QF_MAX_ACTIVE)
+    Q_REQUIRE_ID(400, (prio <= (uint_fast16_t)QF_MAX_ACTIVE)
                       && (QF_active_[prio] != (QActive *)0));
 
     QF_CRIT_ENTRY_();

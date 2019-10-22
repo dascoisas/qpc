@@ -116,7 +116,7 @@
 /* internal implementation (should be used via vtbl only) */
 
 /*! Implementation of the active object start operation */
-void QActive_start_(QActive * const me, uint_fast8_t prio,
+void QActive_start_(QActive * const me, uint_fast16_t prio,
                     QEvt const *qSto[], uint_fast16_t qLen,
                     void *stkSto, uint_fast16_t stkSize,
                     QEvt const *ie);
