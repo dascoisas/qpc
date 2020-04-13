@@ -42,6 +42,12 @@
 /* The maximum number of system clock tick rates */
 #define QF_MAX_TICK_RATE        2U
 
+#define QF_EVENT_SIZ_SIZE    4U
+#define QF_EQUEUE_CTR_SIZE   4U
+#define QF_MPOOL_SIZ_SIZE    4U
+#define QF_MPOOL_CTR_SIZE    4U
+#define QF_TIMEEVT_CTR_SIZE  4U
+
 /* QF interrupt disable/enable and log2()... */
 #if (__ARM_ARCH == 6) /* Cortex-M0/M0+/M1(v6-M, v6S-M)? */
 
