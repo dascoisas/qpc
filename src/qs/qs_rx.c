@@ -4,8 +4,8 @@
 * @ingroup qs
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-01-19
+* Last updated for version 6.8.1
+* Last updated on  2020-05-13
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -333,7 +333,7 @@ void QS_rxParse(void) {
              QS_rxPriv_.tail = QS_rxPriv_.end;
         }
 
-        if (l_rx.esc) {  /* escaped byte arrived? */
+        if (l_rx.esc != 0U) {  /* escaped byte arrived? */
             l_rx.esc = 0U;
             b ^= QS_ESC_XOR;
 
@@ -823,11 +823,14 @@ static void QS_rxParseData_(uint8_t b) {
 static void QS_rxHandleGoodFrame_(uint8_t state) {
     uint8_t i;
     uint8_t *ptr;
+    QS_CRIT_STAT_
 
     switch (state) {
         case WAIT4_INFO_FRAME: {
             /* no need to report Ack or Done */
+            QS_CRIT_ENTRY_();
             QS_target_info_pre_(0U); /* send only Target info */
+            QS_CRIT_EXIT_();
             break;
         }
         case WAIT4_RESET_FRAME: {
@@ -860,7 +863,9 @@ static void QS_rxHandleGoodFrame_(uint8_t state) {
             break;
         }
         case WAIT4_PEEK_FRAME: {
+
             /* no need to report Ack or Done */
+            QS_CRIT_ENTRY_();
             QS_beginRec_((uint_fast8_t)QS_PEEK_DATA);
                 ptr = ((uint8_t *)QS_rxPriv_.currObj[AP_OBJ]
                        + l_rx.var.peek.offs);
@@ -884,6 +889,8 @@ static void QS_rxHandleGoodFrame_(uint8_t state) {
                     }
                 }
             QS_endRec_();
+            QS_CRIT_EXIT_();
+
             QS_REC_DONE(); /* user callback (if defined) */
             break;
         }
@@ -968,6 +975,7 @@ static void QS_rxHandleGoodFrame_(uint8_t state) {
             i = l_rx.var.obj.kind;
             ptr = (uint8_t *)QS_rxPriv_.currObj[i];
             if (ptr != (void *)0) {
+                QS_CRIT_ENTRY_();
                 QS_beginRec_((uint_fast8_t)QS_QUERY_DATA);
                     QS_TIME_PRE_(); /* timestamp */
                     QS_U8_PRE_(i);  /* object kind */
@@ -1003,6 +1011,8 @@ static void QS_rxHandleGoodFrame_(uint8_t state) {
                             break;
                     }
                 QS_endRec_();
+                QS_CRIT_EXIT_();
+
                 QS_REC_DONE(); /* user callback (if defined) */
             }
             else {
@@ -1175,26 +1185,38 @@ static void QS_rxHandleBadFrame_(uint8_t state) {
 
 /****************************************************************************/
 static void QS_rxReportAck_(enum QSpyRxRecords recId) {
+    QS_CRIT_STAT_
+    QS_CRIT_ENTRY_();
     QS_beginRec_((uint_fast8_t)QS_RX_STATUS);
         QS_U8_PRE_(recId); /* record ID */
     QS_endRec_();
+    QS_CRIT_EXIT_();
+
     QS_REC_DONE(); /* user callback (if defined) */
 }
 
 /****************************************************************************/
 static void QS_rxReportError_(uint8_t code) {
+    QS_CRIT_STAT_
+    QS_CRIT_ENTRY_();
     QS_beginRec_((uint_fast8_t)QS_RX_STATUS);
         QS_U8_PRE_(0x80U | code); /* error code */
     QS_endRec_();
+    QS_CRIT_EXIT_();
+
     QS_REC_DONE(); /* user callback (if defined) */
 }
 
 /****************************************************************************/
 static void QS_rxReportDone_(enum QSpyRxRecords recId) {
+    QS_CRIT_STAT_
+    QS_CRIT_ENTRY_();
     QS_beginRec_((uint_fast8_t)QS_TARGET_DONE);
         QS_TIME_PRE_();    /* timestamp */
         QS_U8_PRE_(recId); /* record ID */
     QS_endRec_();
+    QS_CRIT_EXIT_();
+
     QS_REC_DONE(); /* user callback (if defined) */
 }
 
@@ -1240,19 +1262,28 @@ static void QS_rxPoke_(void) {
 */
 uint32_t QS_getTestProbe_(void (* const api)(void)) {
     uint32_t data = 0U;
-    for (uint_fast8_t i = 0U; i < l_testData.tpNum; ++i) {
+    uint_fast8_t i;
+    for (i = 0U; i < l_testData.tpNum; ++i) {
+        uint_fast8_t j;
+
         if (l_testData.tpBuf[i].addr == (QSFun)api) {
+            QS_CRIT_STAT_
+
             data = l_testData.tpBuf[i].data;
+
+            QS_CRIT_ENTRY_();
             QS_beginRec_((uint_fast8_t)QS_TEST_PROBE_GET);
                 QS_TIME_PRE_();    /* timestamp */
                 QS_FUN_PRE_(api);  /* the calling API */
                 QS_U32_PRE_(data); /* the Test-Probe data */
             QS_endRec_();
+            QS_CRIT_EXIT_();
+
             QS_REC_DONE(); /* user callback (if defined) */
 
             --l_testData.tpNum; /* one less Test-Probe */
             /* move all remaining entries in the buffer up by one */
-            for (uint_fast8_t j = i; j < l_testData.tpNum; ++j) {
+            for (j = i; j < l_testData.tpNum; ++j) {
                 l_testData.tpBuf[j] = l_testData.tpBuf[j + 1U];
             }
             break; /* we are done (Test-Probe retreived) */
