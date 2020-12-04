@@ -1,13 +1,13 @@
 ##############################################################################
 # Product: Makefile for QUTEST-QP/C for Windows and POSIX *HOSTS*
-# Last updated for version 6.6.0
-# Last updated on  2019-10-14
+# Last updated for version 6.9.0
+# Last updated on  2020-08-01
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005-2019 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005-2020 Quantum Leaps, LLC. All rights reserved.
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -25,11 +25,11 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# along with this program. If not, see <www.gnu.org/licenses/>.
 #
 # Contact information:
-# https://www.state-machine.com
-# mailto:info@state-machine.com
+# <www.state-machine.com/licensing>
+# <info@state-machine.com>
 ##############################################################################
 #
 # examples of invoking this Makefile:
@@ -138,7 +138,7 @@ INCLUDES += -I$(QPC)/include -I$(QPC)/src -I$(QP_PORT_DIR)
 #
 # NOTE:
 # GNU toolset (MinGW) is included in the QTools collection for Windows, see:
-#     http://sourceforge.net/projects/qpc/files/QTools/
+#     https://www.state-machine.com/qtools
 # It is assumed that %QTOOLS%\bin directory is added to the PATH
 #
 CC    := gcc
@@ -149,7 +149,10 @@ LINK  := gcc    # for C programs
 #-----------------------------------------------------------------------------
 # QUTest test script utilities (requires QTOOLS):
 #
-QUTEST := python $(QTOOLS)/qspy/py/qutest.py
+ifeq ("$(wildcard $(QUTEST))","")
+QUTEST := python3 $(QTOOLS)/qutest/qutest.py
+endif
+
 TESTS  := *.py
 
 #-----------------------------------------------------------------------------
@@ -181,7 +184,15 @@ CPPFLAGS := -c -g -O -fno-pie -std=c++11 -pedantic -Wall -Wextra \
 	-fno-rtti -fno-exceptions \
 	$(INCLUDES) $(DEFINES) -DQ_SPY -DQ_UTEST -DQ_HOST
 
-LINKFLAGS := -no-pie
+ifndef GCC_OLD
+	LINKFLAGS := -no-pie
+endif
+
+ifdef GCOV
+	CFLAGS    += -fprofile-arcs -ftest-coverage
+	CPPFLAGS  += -fprofile-arcs -ftest-coverage
+	LINKFLAGS += -lgcov --coverage
+endif
 
 #-----------------------------------------------------------------------------
 C_OBJS       := $(patsubst %.c,%.o,   $(C_SRCS))
@@ -242,9 +253,7 @@ debug :
 	$(QUTEST) $(TESTS) DEBUG $(HOST)
 
 clean :
-	-$(RM) $(BIN_DIR)/*.o \
-	$(BIN_DIR)/*.d \
-	$(TARGET_EXE)
+	-$(RM) $(BIN_DIR)/*.*
 
 show :
 	@echo PROJECT      = $(PROJECT)

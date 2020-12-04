@@ -5,14 +5,14 @@
 * @ingroup qv
 * @cond
 ******************************************************************************
-* Last updated for version 6.7.0
-* Last updated on  2019-12-19
+* Last updated for version 6.9.1
+* Last updated on  2020-09-08
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
 *                    Modern Embedded Software
 *
-* Copyright (C) 2005-2019 Quantum Leaps, LLC. All rights reserved.
+* Copyright (C) 2005-2020 Quantum Leaps, LLC. All rights reserved.
 *
 * This program is open source software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License as published
@@ -45,10 +45,8 @@
 #include "qmpool.h"   /* QV kernel uses the native QP memory pool  */
 #include "qpset.h"    /* QV kernel uses the native QP priority set */
 
-/*! This macro defines the type of the event queue used for the
-* active objects. For the built-in QV kernel, this is ::QEqueue.
-*/
-#define QF_EQUEUE_TYPE  QEQueue
+/* QV event-queue used for AOs */
+#define QF_EQUEUE_TYPE      QEQueue
 
 /*! QV idle callback (customized in BSPs) */
 /**
@@ -98,8 +96,10 @@ void QV_onIdle(void);
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
     #define QF_EPOOL_EVENT_SIZE_(p_)  ((uint_fast16_t)(p_).blockSize)
-    #define QF_EPOOL_GET_(p_, e_, m_) ((e_) = (QEvt *)QMPool_get(&(p_), (m_)))
-    #define QF_EPOOL_PUT_(p_, e_)     (QMPool_put(&(p_), (e_)))
+    #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
+        ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
+    #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
+        (QMPool_put(&(p_), (e_), (qs_id_)))
 
     extern QPSet QV_readySet_; /*!< QV ready-set of AOs */
 

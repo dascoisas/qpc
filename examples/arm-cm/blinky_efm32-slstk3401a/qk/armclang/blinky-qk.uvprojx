@@ -415,7 +415,7 @@
             <File>
               <FileName>startup_efm32pg1b.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\armclang\startup_efm32pg1b.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\arm\startup_efm32pg1b.s</FilePath>
             </File>
             <File>
               <FileName>em_cmu.c</FileName>
@@ -953,8 +953,8 @@
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
             <v6LangP>3</v6LangP>
-            <vShortEn>0</vShortEn>
-            <vShortWch>0</vShortWch>
+            <vShortEn>1</vShortEn>
+            <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
@@ -1039,7 +1039,7 @@
             <File>
               <FileName>startup_efm32pg1b.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\armclang\startup_efm32pg1b.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\arm\startup_efm32pg1b.s</FilePath>
             </File>
             <File>
               <FileName>em_cmu.c</FileName>
@@ -1663,7 +1663,7 @@
             <File>
               <FileName>startup_efm32pg1b.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\armclang\startup_efm32pg1b.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\efm32pg1b\arm\startup_efm32pg1b.s</FilePath>
             </File>
             <File>
               <FileName>em_cmu.c</FileName>

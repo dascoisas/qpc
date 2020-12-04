@@ -4,8 +4,8 @@
 * @ingroup qxk
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-01-18
+* Last updated for version 6.9.1
+* Last updated on  2020-09-14
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -104,7 +104,6 @@ void QXSemaphore_init(QXSemaphore * const me, uint_fast16_t count,
 *                       to wait for the semaphore. The value of
 *                       QXTHREAD_NO_TIMEOUT indicates that no timeout will
 *                       occur and the semaphore will wait indefinitely.
-* @param[in]  tickRate  system clock tick rate serviced in this call.
 *
 * @returns
 * 'true' if the semaphore has been signaled and 'false' if a timeout occured.
@@ -117,7 +116,7 @@ bool QXSemaphore_wait(QXSemaphore * const me, uint_fast16_t const nTicks) {
     QXThread *curr;
     QF_CRIT_STAT_
 
-    QF_CRIT_ENTRY_();
+    QF_CRIT_E_();
     curr = QXK_PTR_CAST_(QXThread*, QXK_attr_.curr); /* volatile into temp. */
 
     /** @pre this function must:
@@ -137,31 +136,31 @@ bool QXSemaphore_wait(QXSemaphore * const me, uint_fast16_t const nTicks) {
         --me->count; /* semaphore taken: decrement the count */
     }
     else {
-        uint_fast8_t p = (uint_fast8_t)curr->super.prio;
+        uint_fast8_t p = (uint_fast8_t)curr->super.dynPrio;
 
         /* remember the blocking object (this semaphore) */
         curr->super.super.temp.obj = QXK_PTR_CAST_(QMState*, me);
         QXThread_teArm_(curr, (QSignal)QXK_SEMA_SIG, nTicks);
 
-        /* remove this curr prio from the ready set (block)
-        * and insert to the waiting set on this mutex */
+        /* remove this curr prio from the ready set (will block)
+        * and insert to the waiting set on this semaphore */
         QPSet_insert(&me->waitSet,        p); /* add to waiting-set */
         QPSet_remove(&QXK_attr_.readySet, p); /* remove from ready-set */
 
         /* schedule the next thread if multitasking started */
         (void)QXK_sched_();
-        QF_CRIT_EXIT_();
+        QF_CRIT_X_();
         QF_CRIT_EXIT_NOP(); /* BLOCK here !!! */
 
-        QF_CRIT_ENTRY_();   /* AFTER unblocking... */
+        QF_CRIT_E_();   /* AFTER unblocking... */
         /* the blocking object must be this semaphore */
         Q_ASSERT_ID(240, curr->super.super.temp.obj
                          == QXK_PTR_CAST_(QMState*, me));
 
         /* did the blocking time-out? (signal of zero means that it did) */
-        if (curr->timeEvt.super.sig == (QSignal)0) {
+        if (curr->timeEvt.super.sig == 0U) {
             if (QPSet_hasElement(&me->waitSet, p)) { /* still waiting? */
-                QPSet_remove(&me->waitSet, p); /* remove the unblocked thread */
+                QPSet_remove(&me->waitSet, p); /* remove unblocked thread */
                 signaled = false; /* the semaphore was NOT signaled */
                 /* semaphore NOT taken: do NOT decrement the count */
             }
@@ -177,7 +176,7 @@ bool QXSemaphore_wait(QXSemaphore * const me, uint_fast16_t const nTicks) {
         }
         curr->super.super.temp.obj = (QMState *)0; /* clear blocking obj. */
     }
-    QF_CRIT_EXIT_();
+    QF_CRIT_X_();
 
     return signaled;
 }
@@ -204,7 +203,7 @@ bool QXSemaphore_tryWait(QXSemaphore * const me) {
     /** @pre the semaphore must be initialized */
     Q_REQUIRE_ID(300, me->max_count > 0U);
 
-    QF_CRIT_ENTRY_();
+    QF_CRIT_E_();
     /* is the semaphore available? */
     if (me->count > 0U) {
         --me->count;
@@ -213,7 +212,7 @@ bool QXSemaphore_tryWait(QXSemaphore * const me) {
     else { /* the semaphore is NOT available (would block) */
         isAvailable = false;
     }
-    QF_CRIT_EXIT_();
+    QF_CRIT_X_();
 
     return isAvailable;
 }
@@ -245,7 +244,7 @@ bool QXSemaphore_signal(QXSemaphore * const me) {
     /** @pre the semaphore must be initialized */
     Q_REQUIRE_ID(400, me->max_count > 0U);
 
-    QF_CRIT_ENTRY_();
+    QF_CRIT_E_();
     if (me->count < me->max_count) {
 
         ++me->count; /* increment the semaphore count */
@@ -283,7 +282,7 @@ bool QXSemaphore_signal(QXSemaphore * const me) {
     else {
         signaled = false; /* semaphore NOT signaled */
     }
-    QF_CRIT_EXIT_();
+    QF_CRIT_X_();
 
     return signaled;
 }

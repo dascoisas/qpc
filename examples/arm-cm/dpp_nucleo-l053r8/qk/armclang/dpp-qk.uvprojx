@@ -10,7 +10,7 @@
       <TargetName>dpp-dbg</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6100001::V6.10.1::.\ARMCLANG</pCCUsed>
+      <pCCUsed>6130001::V6.13.1::.\ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -398,11 +398,6 @@
               <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
               <FileName>philo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\philo.c</FilePath>
@@ -416,6 +411,11 @@
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -445,7 +445,7 @@
             <File>
               <FileName>startup_stm32l053xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\armclang\startup_stm32l053xx.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\arm\startup_stm32l053xx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -646,6 +646,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
+            <File>
+              <FileName>qs_rx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -654,7 +659,7 @@
       <TargetName>dpp-rel</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6070000::V6.7::.\ARMCLANG</pCCUsed>
+      <pCCUsed>6130001::V6.13.1::.\ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -1042,11 +1047,6 @@
               <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
               <FileName>philo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\philo.c</FilePath>
@@ -1060,6 +1060,11 @@
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1089,7 +1094,7 @@
             <File>
               <FileName>startup_stm32l053xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\armclang\startup_stm32l053xx.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\arm\startup_stm32l053xx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1290,6 +1295,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
             </File>
+            <File>
+              <FileName>qs_rx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1298,7 +1308,7 @@
       <TargetName>dpp-spy</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6070000::V6.7::.\ARMCLANG</pCCUsed>
+      <pCCUsed>6130001::V6.13.1::.\ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -1686,11 +1696,6 @@
               <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
               <FileName>philo.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\philo.c</FilePath>
@@ -1704,6 +1709,11 @@
               <FileName>qstamp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\include\qstamp.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1733,7 +1743,7 @@
             <File>
               <FileName>startup_stm32l053xx.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\armclang\startup_stm32l053xx.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-l053r8\arm\startup_stm32l053xx.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1864,6 +1874,11 @@
               <FileName>qs_pkg.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\src\qs_pkg.h</FilePath>
+            </File>
+            <File>
+              <FileName>qs_rx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
           </Files>
         </Group>

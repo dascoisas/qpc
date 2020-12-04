@@ -4,8 +4,8 @@
 * @ingroup ports
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-03-31
+* Last updated for version 6.9.1
+* Last updated on  2020-09-08
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -50,6 +50,9 @@
 
 /* The number of system clock tick rates */
 #define QF_MAX_TICK_RATE     2U
+
+/* Activate the QF QActive_stop() API */
+#define QF_ACTIVE_STOP       1
 
 /* various QF object sizes configuration for this port */
 #define QF_EVENT_SIZ_SIZE    4U
@@ -111,22 +114,23 @@ int QF_consoleWaitForKey(void);
     /* Win32 active object event queue customization... */
     #define QACTIVE_EQUEUE_WAIT_(me_) \
         while ((me_)->eQueue.frontEvt == (QEvt *)0) { \
-            QF_CRIT_EXIT_(); \
+            QF_CRIT_X_(); \
             (void)WaitForSingleObject((me_)->osObject, (DWORD)INFINITE); \
-            QF_CRIT_ENTRY_(); \
+            QF_CRIT_E_(); \
         }
     #define QACTIVE_EQUEUE_SIGNAL_(me_) \
         Q_ASSERT_ID(410, QF_active_[(me_)->prio] != (QActive *)0); \
         (void)SetEvent((me_)->osObject)
 
     /* native QF event pool operations */
-    #define QF_EPOOL_TYPE_  QMPool
+    #define QF_EPOOL_TYPE_            QMPool
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
-        QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_))
-
-    #define QF_EPOOL_EVENT_SIZE_(p_)  ((p_).blockSize)
-    #define QF_EPOOL_GET_(p_, e_, m_) ((e_) = (QEvt *)QMPool_get(&(p_), (m_)))
-    #define QF_EPOOL_PUT_(p_, e_)     (QMPool_put(&(p_), e_))
+        (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
+    #define QF_EPOOL_EVENT_SIZE_(p_)  ((uint_fast16_t)(p_).blockSize)
+    #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
+        ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
+    #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
+        (QMPool_put(&(p_), (e_), (qs_id_)))
 
     /* Minimum required Windows version is Windows-XP or newer (0x0501) */
     #ifdef WINVER

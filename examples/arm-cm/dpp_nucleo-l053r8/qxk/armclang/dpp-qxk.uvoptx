@@ -767,7 +767,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\..\3rd_party\nucleo-l053r8\armclang\startup_stm32l053xx.s</PathWithFileName>
+      <PathWithFileName>..\..\..\..\..\3rd_party\nucleo-l053r8\arm\startup_stm32l053xx.s</PathWithFileName>
       <FilenameWithoutPath>startup_stm32l053xx.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1117,6 +1117,18 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\..\src\qs_pkg.h</PathWithFileName>
       <FilenameWithoutPath>qs_pkg.h</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>5</GroupNumber>
+      <FileNumber>41</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\..\..\src\qs\qs_rx.c</PathWithFileName>
+      <FilenameWithoutPath>qs_rx.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

@@ -4,8 +4,8 @@
 * @ingroup ports
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-03-31
+* Last updated for version 6.9.1
+* Last updated on  2020-10-03
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -113,19 +113,9 @@ void QF_leaveCriticalSection_(void) {
 
 /****************************************************************************/
 int_t QF_run(void) {
-    struct sched_param sparam;
     QF_CRIT_STAT_
 
     QF_onStartup();  /* invoke startup callback */
-
-    /* try to set the priority of the ticker thread, see NOTE01 */
-    sparam.sched_priority = l_tickPrio;
-    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &sparam) == 0) {
-        /* success, this application has sufficient privileges */
-    }
-    else {
-        /* setting priority failed, probably due to insufficient privieges */
-    }
 
     l_isRunning = true; /* QF is running */
 
@@ -133,20 +123,24 @@ int_t QF_run(void) {
     if ((l_tick.tv_sec != 0) || (l_tick.tv_nsec != 0)) {
         pthread_attr_t attr;
         struct sched_param param;
-        pthread_t idle;
+        pthread_t ticker;
+        int err;
+
+        pthread_attr_init(&attr);
 
         /* SCHED_FIFO corresponds to real-time preemptive priority-based
         * scheduler.
         * NOTE: This scheduling policy requires the superuser priviledges
         */
-        pthread_attr_init(&attr);
-        pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
-        param.sched_priority = sched_get_priority_min(SCHED_FIFO);
+        pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
+        pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+        pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
+        param.sched_priority = l_tickPrio;
         pthread_attr_setschedparam(&attr, &param);
-        pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-        if (pthread_create(&idle, &attr, &ticker_thread, 0) != 0) {
+        err = pthread_create(&ticker, &attr, &ticker_thread, 0);
+        if (err != 0) {
             /* Creating the p-thread with the SCHED_FIFO policy failed.
             * Most probably this application has no superuser privileges,
             * so we just fall back to the default SCHED_OTHER policy
@@ -155,15 +149,23 @@ int_t QF_run(void) {
             pthread_attr_setschedpolicy(&attr, SCHED_OTHER);
             param.sched_priority = 0;
             pthread_attr_setschedparam(&attr, &param);
-            if (pthread_create(&idle, &attr, &ticker_thread, 0) == 0) {
-                return false;
-            }
+            err = pthread_create(&ticker, &attr, &ticker_thread, 0);
         }
+        Q_ASSERT_ID(310, err == 0); /* ticker thread must be created */
+
+        //pthread_attr_getschedparam(&attr, &param);
+        //printf("param.sched_priority==%d\n", param.sched_priority);
+
         pthread_attr_destroy(&attr);
     }
 
     /* the combined event-loop and background-loop of the QV kernel */
-    QF_CRIT_ENTRY_();
+    QF_CRIT_E_();
+
+    /* produce the QS_QF_RUN trace record */
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_RUN, 0U)
+    QS_END_NOCRIT_PRE_()
+
     while (l_isRunning) {
         QEvt const *e;
         QActive *a;
@@ -174,7 +176,7 @@ int_t QF_run(void) {
 
             QPSet_findMax(&QV_readySet_, p);
             a = QF_active_[p];
-            QF_CRIT_EXIT_();
+            QF_CRIT_X_();
 
             /* the active object 'a' must still be registered in QF
             * (e.g., it must not be stopped)
@@ -188,10 +190,10 @@ int_t QF_run(void) {
             * 3. determine if event is garbage and collect it if so
             */
             e = QActive_get_(a);
-            QHSM_DISPATCH(&a->super, e);
+            QHSM_DISPATCH(&a->super, e, a->prio);
             QF_gc(e);
 
-            QF_CRIT_ENTRY_();
+            QF_CRIT_E_();
 
             if (a->eQueue.frontEvt == (QEvt *)0) { /* empty queue? */
                 QPSet_remove(&QV_readySet_, p);
@@ -208,7 +210,7 @@ int_t QF_run(void) {
             }
         }
     }
-    QF_CRIT_EXIT_();
+    QF_CRIT_X_();
     QF_onCleanup();  /* cleanup callback */
     QS_EXIT();       /* cleanup the QSPY connection */
 
@@ -283,8 +285,31 @@ void QActive_start_(QActive * const me, uint_fast8_t prio,
     me->prio = (uint8_t)prio;
     QF_add_(me); /* make QF aware of this active object */
 
-    QHSM_INIT(&me->super, par); /* the top-most initial tran. (virtual) */
+    /* the top-most initial tran. (virtual) */
+    QHSM_INIT(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
+}
+/*..........................................................................*/
+#ifdef QF_ACTIVE_STOP
+void QActive_stop(QActive * const me) {
+    QF_CRIT_STAT_
+
+    QActive_unsubscribeAll(me); /* unsubscribe from all events */
+
+    /* make sure the AO is no longer in "ready set" */
+    QF_CRIT_E_();
+    QPSet_remove(&QV_readySet_, me->prio);
+    QF_CRIT_X_();
+
+    QF_remove_(me); /* remove this AO from QF */
+}
+#endif
+/*..........................................................................*/
+void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
+    (void)me;    /* unused parameter */
+    (void)attr1; /* unused parameter */
+    (void)attr2; /* unused parameter */
+    Q_ERROR_ID(900); /* this function should not be called in this QP port */
 }
 
 /****************************************************************************/
@@ -337,12 +362,12 @@ static void sigIntHandler(int dummy) {
 *
 * However, QF limits the number of priority levels to QF_MAX_ACTIVE.
 * Assuming that a QF application will be real-time, this port reserves the
-* three highest Linux priorities for the ISR-like threads (e.g., the ticker,
-* I/O), and the rest highest-priorities for the active objects.
+* three highest p-thread priorities for the ISR-like threads (e.g., I/O),
+* and the rest highest-priorities for the active objects.
 *
 * NOTE05:
 * In some (older) Linux kernels, the POSIX nanosleep() system call might
 * deliver only 2*actual-system-tick granularity. To compensate for this,
-* you would need to reduce (by 2) the constant NANOSLEEP_NSEC_PER_SEC.
+* you would need to reduce the constant NANOSLEEP_NSEC_PER_SEC by factor 2.
 */
 

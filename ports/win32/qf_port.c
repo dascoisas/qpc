@@ -4,8 +4,8 @@
 * @ingroup ports
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-03-31
+* Last updated for version 6.9.1
+* Last updated on  2020-09-18
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -91,6 +91,10 @@ int_t QF_run(void) {
 
     QF_onStartup(); /* application-specific startup callback */
 
+    /* produce the QS_QF_RUN trace record */
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_RUN, 0U)
+    QS_END_NOCRIT_PRE_()
+
     /* leave the startup critical section to unblock any active objects
     * started before calling QF_run()
     */
@@ -153,7 +157,8 @@ void QActive_start_(QActive * const me, uint_fast8_t prio,
     /* create the Win32 "event" to throttle the AO's event queue */
     me->osObject = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-    QHSM_INIT(&me->super, par); /* the top-most initial tran. (virtual) */
+    /* the top-most initial tran. (virtual) */
+    QHSM_INIT(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
 
     /* create a Win32 thread for the AO;
@@ -167,6 +172,20 @@ void QActive_start_(QActive * const me, uint_fast8_t prio,
         0,
         NULL);
     Q_ENSURE_ID(830, me->thread != (HANDLE)0); /* must succeed */
+}
+/*..........................................................................*/
+#ifdef QF_ACTIVE_STOP
+void QActive_stop(QActive * const me) {
+    QActive_unsubscribeAll(me); /* unsubscribe this AO from all events */
+    me->thread = (void *)0; /* stop the thread loop (see ao_thread()) */
+}
+#endif
+/*..........................................................................*/
+void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
+    (void)me;    /* unused parameter */
+    (void)attr1; /* unused parameter */
+    (void)attr2; /* unused parameter */
+    Q_ERROR_ID(900); /* this function should not be called in this QP port */
 }
 
 /****************************************************************************/
@@ -196,12 +215,19 @@ static DWORD WINAPI ao_thread(LPVOID arg) { /* for CreateThread() */
     EnterCriticalSection(&l_startupCritSect);
     LeaveCriticalSection(&l_startupCritSect);
 
-    /* event-loop */
-    for (;;) { /* for-ever */
+#ifdef QF_ACTIVE_STOP
+    while (act->thread)
+#else
+    for (;;) /* for-ever */
+#endif
+    {
         QEvt const *e = QActive_get_(act); /* wait for event */
-        QHSM_DISPATCH(&act->super, e);     /* dispatch to the AO's SM */
+        QHSM_DISPATCH(&act->super, e, act->prio); /* dispatch to the SM */
         QF_gc(e); /* check if the event is garbage, and collect it if so */
     }
+#ifdef QF_ACTIVE_STOP
+    QF_remove_(act); /* remove this object from QF */
+#endif
     return (DWORD)0; /* return success */
 }
 

@@ -1,17 +1,18 @@
-# Doxyfile 1.8.14
+# Doxyfile 1.8.18
 
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "QP/C"
-PROJECT_NUMBER         = "6.8.1"
+PROJECT_NUMBER         = "6.9.1"
 PROJECT_BRIEF          =
 PROJECT_LOGO           = images/header_logo_ql.png
 OUTPUT_DIRECTORY       =
 CREATE_SUBDIRS         = NO
 ALLOW_UNICODE_NAMES    = NO
 OUTPUT_LANGUAGE        = English
+OUTPUT_TEXT_DIRECTION  = None
 BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
 ABBREVIATE_BRIEF       =
@@ -22,25 +23,25 @@ STRIP_FROM_PATH        =
 STRIP_FROM_INC_PATH    =
 SHORT_NAMES            = NO
 JAVADOC_AUTOBRIEF      = NO
+JAVADOC_BANNER         = NO
 QT_AUTOBRIEF           = YES
 MULTILINE_CPP_IS_BRIEF = YES
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
-ALIASES += next{1}="<hr><b>Next:</b> @ref \1</p>"
-ALIASES += description="@par <b>Description</b>"
-ALIASES += hint="@par <b>Hint</b>"
-ALIASES += usage="@par <b>Usage</b>"
-ALIASES += reqdef{2}="<div class="vmargin20"></div>@anchor \1 <TABLE><TR ALIGN="left"><TH NOWRAP>\1</TH><TH WIDTH="100%">\2</TH></TR></TABLE>"
-ALIASES += reqref{1}="@ref \1 \"\1\""
-ALIASES += termdef{2}="@anchor term_\1 @par \2"
-ALIASES += termref{1}="@ref term_\1"
-
-TCL_SUBST              =
+ALIASES                = "next{1}=<hr><b>Next:</b> @ref \1</p>" \
+                         "description=@par Description" \
+                         "hint=@par Hint" \
+                         "usage=@par Usage" \
+                         "reqdef{2}=<div class= vmargin20></div>@anchor \1 <TABLE><TR ALIGN= left><TH NOWRAP>\1</TH><TH WIDTH= 100%>\2</TH></TR></TABLE>" \
+                         "reqref{1}=@ref \1 \"\1\"" \
+                         "termdef{2}=@anchor term_\1 @par \2" \
+                         "termref{1}=@ref term_\1"
 OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = NO
 OPTIMIZE_OUTPUT_VHDL   = NO
+OPTIMIZE_OUTPUT_SLICE  = NO
 EXTENSION_MAPPING      = lnt=Objective-C
 MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 4
@@ -61,6 +62,7 @@ LOOKUP_CACHE_SIZE      = 0
 #---------------------------------------------------------------------------
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
+EXTRACT_PRIV_VIRTUAL   = NO
 EXTRACT_PACKAGE        = YES
 EXTRACT_STATIC         = YES
 EXTRACT_LOCAL_CLASSES  = YES
@@ -110,63 +112,53 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT = \
-    main.dox \
-    gs.dox \
-    struct.dox \
-    api.dox \
-    exa.dox \
-    exa_apps.dox \
-    exa_native.dox \
-    ../../doxygen/exa_low-power.dox \
-    exa_rtos.dox \
-    exa_os.dox \
-    exa_qutest.dox \
-    exa_mware.dox \
-    ports.dox \
-    ports_native.dox \
-    ../../doxygen/ports_arm-cm.dox \
-    ports_rtos.dox \
-    ports_os.dox \
-    history.dox \
-    macros.h \
-    metrics.dox \
-    modules.dox \
-    ../include \
-    ../src \
-    ../ports/lint-plus \
-    ../../doxygen/help.dox
-
+INPUT                  = main.dox \
+                         gs.dox \
+                         struct.dox \
+                         api.dox \
+                         exa.dox \
+                         exa_apps.dox \
+                         exa_native.dox \
+                         ../../doxygen/exa_low-power.dox \
+                         exa_rtos.dox \
+                         exa_os.dox \
+                         exa_qutest.dox \
+                         exa_mware.dox \
+                         ports.dox \
+                         ports_native.dox \
+                         ../../doxygen/ports_arm-cm.dox \
+                         ports_rtos.dox \
+                         ports_os.dox \
+                         history.dox \
+                         macros.h \
+                         metrics.dox \
+                         modules.dox \
+                         ../include \
+                         ../src \
+                         ../ports/lint-plus \
+                         ../../doxygen/help.dox
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = \
-    *.dox \
-    *.h \
-    *.c \
-    *.cpp \
-    *.s \
-    *.asm \
-    *.lnt
-
+FILE_PATTERNS          = *.dox \
+                         *.h \
+                         *.c \
+                         *.cpp \
+                         *.s \
+                         *.asm \
+                         *.lnt
 RECURSIVE              = YES
-EXCLUDE                = \
-    ../include/qs_dummy.h \
-    ../src/qk \
-    ../src/qxk
-
+EXCLUDE                = ../include/qs_dummy.h
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        = QP_IMPL
-
-EXAMPLE_PATH           = \
-    snippets \
-    ../include \
-    ../src \
-    ../ports \
-    ../examples
-
+EXAMPLE_PATH           = snippets \
+                         ../include \
+                         ../src \
+                         ../ports \
+                         ../examples
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = images ../../doxygen/images
+IMAGE_PATH             = images \
+                         ../../doxygen/images
 INPUT_FILTER           =
 FILTER_PATTERNS        =
 FILTER_SOURCE_FILES    = NO
@@ -186,6 +178,7 @@ USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 CLANG_ASSISTED_PARSING = NO
 CLANG_OPTIONS          =
+CLANG_DATABASE_PATH    =
 #---------------------------------------------------------------------------
 # Configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
@@ -207,13 +200,14 @@ HTML_COLORSTYLE_HUE    = 220
 HTML_COLORSTYLE_SAT    = 100
 HTML_COLORSTYLE_GAMMA  = 80
 HTML_TIMESTAMP         = NO
+HTML_DYNAMIC_MENUS     = YES
 HTML_DYNAMIC_SECTIONS  = NO
 HTML_INDEX_NUM_ENTRIES = 100
 GENERATE_DOCSET        = NO
 DOCSET_FEEDNAME        = "Doxygen generated docs"
 DOCSET_BUNDLE_ID       = com.state-machine.doc
 DOCSET_PUBLISHER_ID    = com.state-machine.doc
-DOCSET_PUBLISHER_NAME  = Quantum Leaps
+DOCSET_PUBLISHER_NAME  = QuantumLeaps
 GENERATE_HTMLHELP      = YES
 CHM_FILE               = ../qpc.chm
 HHC_LOCATION           =
@@ -236,8 +230,10 @@ GENERATE_TREEVIEW      = YES
 ENUM_VALUES_PER_LINE   = 4
 TREEVIEW_WIDTH         = 180
 EXT_LINKS_IN_WINDOW    = NO
+HTML_FORMULA_FORMAT    = png
 FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
+FORMULA_MACROFILE      =
 USE_MATHJAX            = NO
 MATHJAX_FORMAT         = HTML-CSS
 MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
@@ -257,6 +253,7 @@ GENERATE_LATEX         = NO
 LATEX_OUTPUT           = latex
 LATEX_CMD_NAME         = latex
 MAKEINDEX_CMD_NAME     = makeindex
+LATEX_MAKEINDEX_CMD    = makeindex
 COMPACT_LATEX          = NO
 PAPER_TYPE             = letter
 EXTRA_PACKAGES         =
@@ -271,6 +268,7 @@ LATEX_HIDE_INDICES     = NO
 LATEX_SOURCE_CODE      = NO
 LATEX_BIB_STYLE        = plain
 LATEX_TIMESTAMP        = NO
+LATEX_EMOJI_DIRECTORY  =
 #---------------------------------------------------------------------------
 # Configuration options related to the RTF output
 #---------------------------------------------------------------------------
@@ -295,6 +293,7 @@ MAN_LINKS              = NO
 GENERATE_XML           = NO
 XML_OUTPUT             = xml
 XML_PROGRAMLISTING     = YES
+XML_NS_MEMB_FILE_SCOPE = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the DOCBOOK output
 #---------------------------------------------------------------------------
@@ -321,15 +320,20 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = \
-    Q_SPY QP_IMPL Q_UTEST \
-    QK_ON_CONTEXT_SW \
-    QXK_ON_CONTEXT_SW \
-    QF_MAX_ACTIVE QF_MAX_TICK_RATE QF_MAX_EPOOL \
-    QF_EVENT_SIZ_SIZE QF_EQUEUE_CTR_SIZE \
-    QF_MPOOL_SIZ_SIZE QF_MPOOL_CTR_SIZE \
-    QF_TIMEEVT_CTR_SIZE QS_TIME_SIZE
-
+PREDEFINED             = Q_SPY \
+                         QP_IMPL \
+                         Q_UTEST \
+                         QK_ON_CONTEXT_SW \
+                         QXK_ON_CONTEXT_SW \
+                         QF_MAX_ACTIVE \
+                         QF_MAX_TICK_RATE \
+                         QF_MAX_EPOOL \
+                         QF_EVENT_SIZ_SIZE \
+                         QF_EQUEUE_CTR_SIZE \
+                         QF_MPOOL_SIZ_SIZE \
+                         QF_MPOOL_CTR_SIZE \
+                         QF_TIMEEVT_CTR_SIZE \
+                         QS_TIME_SIZE
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------

@@ -4,8 +4,8 @@
 * @ingroup ports
 * @cond
 ******************************************************************************
-* Last updated for version 6.8.0
-* Last updated on  2020-03-23
+* Last updated for version 6.9.1
+* Last updated on  2020-10-03
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
@@ -80,8 +80,6 @@ static void sigIntHandler(int dummy);
 
 /* QF functions ============================================================*/
 void QF_init(void) {
-    extern uint_fast8_t QF_maxPool_;
-    extern QTimeEvt QF_timeEvtHead_[QF_MAX_TICK_RATE];
     struct sigaction sig_act;
 
     /* lock memory so we're never swapped out to disk */
@@ -121,6 +119,10 @@ int_t QF_run(void) {
     struct sched_param sparam;
 
     QF_onStartup();  /* invoke startup callback */
+
+    /* produce the QS_QF_RUN trace record */
+    QS_BEGIN_NOCRIT_PRE_(QS_QF_RUN, 0U)
+    QS_END_NOCRIT_PRE_()
 
     /* try to set the priority of the ticker thread, see NOTE01 */
     sparam.sched_priority = l_tickPrio;
@@ -196,12 +198,20 @@ static void *thread_routine(void *arg) { /* the expected POSIX signature */
     pthread_mutex_lock(&l_startupMutex);
     pthread_mutex_unlock(&l_startupMutex);
 
-    /* event-loop */
-    for (;;) { /* for-ever */
+#ifdef QF_ACTIVE_STOP
+    act->thread = true;
+    while (act->thread)
+#else
+    for (;;) /* for-ever */
+#endif
+    {
         QEvt const *e = QActive_get_(act); /* wait for the event */
-        QHSM_DISPATCH(&act->super, e);     /* dispatch to the HSM */
+        QHSM_DISPATCH(&act->super, e, act->prio); /* dispatch to the HSM */
         QF_gc(e); /* check if the event is garbage, and collect it if so */
     }
+#ifdef QF_ACTIVE_STOP
+    QF_remove_(act); /* remove this object from QF */
+#endif
     return (void *)0; /* return success */
 }
 
@@ -214,6 +224,7 @@ void QActive_start_(QActive * const me, uint_fast8_t prio,
     pthread_t thread;
     pthread_attr_t attr;
     struct sched_param param;
+    int err;
 
     /* p-threads allocate stack internally */
     Q_REQUIRE_ID(600, stkSto == (void *)0);
@@ -224,39 +235,60 @@ void QActive_start_(QActive * const me, uint_fast8_t prio,
     me->prio = (uint8_t)prio;
     QF_add_(me); /* make QF aware of this active object */
 
-    QHSM_INIT(&me->super, par); /* the top-most initial tran. (virtual) */
+    /* the top-most initial tran. (virtual) */
+    QHSM_INIT(&me->super, par, me->prio);
     QS_FLUSH(); /* flush the trace buffer to the host */
+
+    pthread_attr_init(&attr);
 
     /* SCHED_FIFO corresponds to real-time preemptive priority-based scheduler
     * NOTE: This scheduling policy requires the superuser privileges
     */
-    pthread_attr_init(&attr);
-    pthread_attr_setschedpolicy(&attr, SCHED_FIFO);
+    pthread_attr_setschedpolicy (&attr, SCHED_FIFO);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
+    pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED);
 
-    /* see NOTE04 */
+    /* priority of the p-thread, see NOTE04 */
     param.sched_priority = prio
                            + (sched_get_priority_max(SCHED_FIFO)
-                              - QF_MAX_ACTIVE - 3);
-
+                              - QF_MAX_ACTIVE - 3U);
     pthread_attr_setschedparam(&attr, &param);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+
     pthread_attr_setstacksize(&attr, (stkSize < PTHREAD_STACK_MIN
                                       ? PTHREAD_STACK_MIN
                                       : stkSize));
 
-    if (pthread_create(&thread, &attr, &thread_routine, me) != 0) {
-        /* Creating the p-thread with the SCHED_FIFO policy failed. Most
-        * probably this application has no superuser privileges, so we just
-        * fall back to the default SCHED_OTHER policy and priority 0.
+    err = pthread_create(&thread, &attr, &thread_routine, me);
+    if (err != 0) {
+        /* Creating p-thread with the SCHED_FIFO policy failed. Most likely
+        * this application has no superuser privileges, so we just fall
+        * back to the default SCHED_OTHER policy and priority 0.
         */
         pthread_attr_setschedpolicy(&attr, SCHED_OTHER);
         param.sched_priority = 0;
         pthread_attr_setschedparam(&attr, &param);
-        Q_ALLEGE_ID(601,
-            pthread_create(&thread, &attr, &thread_routine, me) == 0);
+        err = pthread_create(&thread, &attr, &thread_routine, me);
     }
+    Q_ASSERT_ID(610, err == 0); /* AO thread must be created */
+
+    //pthread_attr_getschedparam(&attr, &param);
+    //printf("param.sched_priority==%d\n", param.sched_priority);
+
     pthread_attr_destroy(&attr);
-    me->thread = 1U;
+}
+/*..........................................................................*/
+#ifdef QF_ACTIVE_STOP
+void QActive_stop(QActive * const me) {
+    QActive_unsubscribeAll(me); /* unsubscribe this AO from all events */
+    me->thread = false; /* stop the thread loop (see thread_routine()) */
+}
+#endif
+/*..........................................................................*/
+void QActive_setAttr(QActive *const me, uint32_t attr1, void const *attr2) {
+    (void)me;    /* unused parameter */
+    (void)attr1; /* unused parameter */
+    (void)attr2; /* unused parameter */
+    Q_ERROR_ID(900); /* this function should not be called in this QP port */
 }
 
 /****************************************************************************/
@@ -300,12 +332,12 @@ static void sigIntHandler(int dummy) {
 *
 * However, QF limits the number of priority levels to QF_MAX_ACTIVE.
 * Assuming that a QF application will be real-time, this port reserves the
-* three highest Linux priorities for the ISR-like threads (e.g., the ticker,
-* I/O), and the rest highest-priorities for the active objects.
+* three highest p-thread priorities for the ISR-like threads (e.g., I/O),
+* and the rest highest-priorities for the active objects.
 *
 * NOTE05:
 * In some (older) Linux kernels, the POSIX nanosleep() system call might
 * deliver only 2*actual-system-tick granularity. To compensate for this,
-* you would need to reduce (by 2) the constant NANOSLEEP_NSEC_PER_SEC.
+* you would need to reduce the constant NANOSLEEP_NSEC_PER_SEC by factor 2.
 */
 

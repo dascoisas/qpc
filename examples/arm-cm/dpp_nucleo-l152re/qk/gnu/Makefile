@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C on NUCLEO-L152RE, QK kernel, GNU-ARM
-# Last Updated for Version: 6.5.0
-# Date of the Last Update:  2019-04-15
+# Last Updated for Version: 6.9.1
+# Date of the Last Update:  2020-09-30
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -128,6 +128,7 @@ QP_ASMS :=
 QS_SRCS := \
 	qs.c \
 	qs_rx.c \
+	qs_64bit.c \
 	qs_fp.c
 
 LIB_DIRS  :=
@@ -163,7 +164,7 @@ endif
 CC    := $(GNU_ARM)/bin/arm-none-eabi-gcc
 CPP   := $(GNU_ARM)/bin/arm-none-eabi-g++
 AS    := $(GNU_ARM)/bin/arm-none-eabi-as
-LINK  := $(GNU_ARM)/bin/arm-none-eabi-g++
+LINK  := $(GNU_ARM)/bin/arm-none-eabi-gcc
 BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
 

@@ -5,14 +5,14 @@
 * @ingroup qk
 * @cond
 ******************************************************************************
-* Last updated for version 6.6.0
-* Last updated on  2019-07-30
+* Last updated for version 6.9.1
+* Last updated on  2020-09-08
 *
 *                    Q u a n t u m  L e a P s
 *                    ------------------------
 *                    Modern Embedded Software
 *
-* Copyright (C) 2005-2019 Quantum Leaps, LLC. All rights reserved.
+* Copyright (C) 2005-2020 Quantum Leaps, LLC. All rights reserved.
 *
 * This program is open source software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License as published
@@ -48,16 +48,10 @@
 /****************************************************************************/
 /* QF configuration for QK -- data members of the QActive class... */
 
-/*! Kernel-dependent type of the event queue used for QK threads */
-/**
-* @description
-* QK uses the native QP event queue QEQueue.
-*/
+/* QK event-queue used for AOs */
 #define QF_EQUEUE_TYPE      QEQueue
 
-/*! Kernel-dependent type of the thread attribute in QK */
-/**
-* @description
+/* QK thread type used for AOs
 * QK uses this member to store the private Thread-Local Storage pointer.
 */
 #define QF_THREAD_TYPE      void*
@@ -196,8 +190,10 @@ void QK_schedUnlock(QSchedStatus stat);
     #define QF_EPOOL_INIT_(p_, poolSto_, poolSize_, evtSize_) \
         (QMPool_init(&(p_), (poolSto_), (poolSize_), (evtSize_)))
     #define QF_EPOOL_EVENT_SIZE_(p_)  ((uint_fast16_t)(p_).blockSize)
-    #define QF_EPOOL_GET_(p_, e_, m_) ((e_) = (QEvt *)QMPool_get(&(p_), (m_)))
-    #define QF_EPOOL_PUT_(p_, e_)     (QMPool_put(&(p_), (e_)))
+    #define QF_EPOOL_GET_(p_, e_, m_, qs_id_) \
+        ((e_) = (QEvt *)QMPool_get(&(p_), (m_), (qs_id_)))
+    #define QF_EPOOL_PUT_(p_, e_, qs_id_) \
+        (QMPool_put(&(p_), (e_), (qs_id_)))
 
 #endif /* QP_IMPL */
 
